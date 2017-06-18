@@ -4,7 +4,7 @@
 void ofApp::setup()
 {
     ofSetWindowShape(1000, 1000);
-
+    
     ofLog(OF_LOG_NOTICE, "%d : %d",  ofGetWindowWidth(), ofGetWindowHeight());
     ofLog(OF_LOG_NOTICE, "%d : %d",  ofGetWidth(), ofGetHeight());
 
@@ -21,10 +21,12 @@ void ofApp::setup()
     w = image.getWidth();
     h = image.getHeight();
     changing = false;
+    showOriginal = false;
     
-    // Starting colour
+    // Starting colour & distance
     selectedColour = color;
     selectedDistance = 0;
+    
     createMesh(true, color);
 }
 
@@ -37,8 +39,11 @@ void ofApp::createMesh(bool withLines, ofColor cColor)
 {
     mesh.clear();
     
-//  mesh.setMode(OF_PRIMITIVE_POINTS);
-    mesh.setMode(OF_PRIMITIVE_LINES);
+    if(withLines == true){
+        mesh.setMode(OF_PRIMITIVE_LINES);
+    } else {
+        mesh.setMode(OF_PRIMITIVE_POINTS);
+    }
     mesh.enableColors();
     mesh.enableIndices();
     mesh.disableNormals();
@@ -84,7 +89,7 @@ void ofApp::createMesh(bool withLines, ofColor cColor)
         
         // Make connections between vertices with distance below...
         ofColor cColor = color;
-//        float connectionDistance = ofMap(cColor.a, 0, 255, 10, 20);
+        // float connectionDistance = ofMap(cColor.a, 0, 255, 10, 20);
         int numVerts = mesh.getNumVertices();
         for (int a=0; a<numVerts; ++a) {
             ofVec3f verta = mesh.getVertex(a);
@@ -94,7 +99,7 @@ void ofApp::createMesh(bool withLines, ofColor cColor)
                 if (vertexDistance <= selectedDistance) {
                     // In OF_PRIMITIVE_LINES, every pair of vertices or indices will be
                     // connected to form a line
-                                    ofLog(OF_LOG_NOTICE, "distance %f", vertexDistance);
+                    // ofLog(OF_LOG_NOTICE, "distance %f", vertexDistance);
 
                     mesh.addIndex(a);
                     mesh.addIndex(b);
@@ -157,10 +162,13 @@ void ofApp::draw()
     ofBackgroundGradient(edgeColor, centerColor, OF_GRADIENT_CIRCULAR);
 //    ofBackground(edgeColor);
     
-//    image.draw(0, 0);
     
     easyCam.begin();
         ofPushMatrix();
+            if(showOriginal == true){
+                image.draw(-500, -500, 1000, 1000);
+            }
+            ofScale(1.0, -1.0);
             ofTranslate(-ofGetWindowWidth()/2, -ofGetWindowHeight()/2);
             mesh.drawFaces();
         ofPopMatrix();
@@ -183,11 +191,12 @@ void ofApp::processOpenFileSelection(ofFileDialogResult openFileResult){
 		string fileExtension = ofToUpper(file.getExtension());
 		
 		//We only want images
-		if (fileExtension == "JPG" || fileExtension == "PNG") {
+		if (fileExtension == "JPG" || fileExtension == "JPEG" || fileExtension == "PNG") {
             
 			//Load the selected image
 			image.load(openFileResult.getPath());
-            
+            loadedFileName = openFileResult.getName();
+
             int maxW = 200;
             int maxH = 200;
             float ratio = max(maxW/image.getWidth(), maxH/image.getHeight());
@@ -220,9 +229,9 @@ void ofApp::exit()
 
 void ofApp::keyPressed(ofKeyEventArgs& key)
 {
-    // ofLog(OF_LOG_NOTICE, "NUM NORMALS: %d", size);
+     ofLog(OF_LOG_NOTICE, loadedFileName + "_mesh.ply");
     if (key.key == 's'){
-        mesh.save("mesh.ply");
+        mesh.save(loadedFileName + "_mesh.ply");
     }
     
     if (key.key == ' '){
@@ -242,6 +251,10 @@ void ofApp::keyPressed(ofKeyEventArgs& key)
 			ofLogVerbose("User hit cancel");
 		}
 	}
+    
+    if(key.key == 'o'){
+        showOriginal = !showOriginal;
+    }
 }
 
 void ofApp::keyReleased(ofKeyEventArgs& key)

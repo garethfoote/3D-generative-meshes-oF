@@ -14,6 +14,7 @@ class ofApp : public ofBaseApp
     int h;
     
     bool changing;
+    bool showOriginal;
     
 	ofxPanel gui;
     ofParameter<ofColor> color;
@@ -30,7 +31,8 @@ class ofApp : public ofBaseApp
     void createMesh (bool withLines, ofColor overrideColor);
 
     void processOpenFileSelection(ofFileDialogResult openFileResult);
-
+    string loadedFileName;
+    
     void setup  ();
     void update ();
     void draw   ();
