@@ -88,6 +88,12 @@ Desktop.ini
 # Android
 .csettings
 
+# From project generator macOs
+*.xcodeproj
+Project.xcconfig
+Makefile
+config.make
+*.plist
 
-# ofApp
-build*
+# App
+bin/data/*.ply
